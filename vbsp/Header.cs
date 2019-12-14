@@ -1,4 +1,4 @@
-﻿namespace Dmajster.Bsp
+﻿namespace vbsp
 {
     public struct Header
     {

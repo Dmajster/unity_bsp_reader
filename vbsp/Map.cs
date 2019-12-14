@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Dmajster.Bsp
+namespace vbsp
 {
     public class Map
     {

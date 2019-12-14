@@ -1,12 +1,12 @@
-﻿using System;
+﻿using vbsp;
 
-namespace Sandbox
+namespace sandbox
 {
     internal class Program
     {
         private static void Main(string[] args)
         {
-            Dmajster.Bsp.Reader.Read("./de_dust2.bsp");
+            Reader.Read("./de_dust2.bsp");
         }
     }
 }

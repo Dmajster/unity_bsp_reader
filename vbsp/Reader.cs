@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 
-namespace Dmajster.Bsp
+namespace vbsp
 {
     public class Reader
     {
