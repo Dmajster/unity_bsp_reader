@@ -31,6 +31,10 @@ namespace vbsp.structs
             {
                 return 13;
             }
+            if (typeof(T) == typeof(OriginalFace))
+            {
+                return 27;
+            }
 
             throw new Exception($"Type not stored in any lump! {typeof(T)}");
         }

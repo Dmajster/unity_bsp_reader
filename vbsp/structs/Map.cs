@@ -7,5 +7,6 @@
         public Edge[] Edges;
         public SurfaceEdge[] SurfaceEdges;
         public Face[] Faces;
+        public OriginalFace[] OriginalFaces;
     }
 }

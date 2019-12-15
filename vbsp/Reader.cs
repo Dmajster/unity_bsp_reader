@@ -7,9 +7,11 @@ namespace vbsp
 {
     public class Reader
     {
-        public static Map ReadStream(Stream stream)
+        public static Map Read(string path)
         {
-            var binaryReader = new BinaryReader(stream);
+            using var fileStream = File.OpenRead(path);
+
+            var binaryReader = new BinaryReader(fileStream);
 
             var header = new Header
             {
@@ -42,11 +44,12 @@ namespace vbsp
 
             return new Map
             {
-                Planes = DeserializeLumpArray<Plane>(header, stream, binaryReader),
-                Vertices = DeserializeLumpArray<Vector>(header, stream, binaryReader),
-                Edges = DeserializeLumpArray<Edge>(header, stream, binaryReader),
-                SurfaceEdges = DeserializeLumpArray<SurfaceEdge>(header, stream, binaryReader),
-                Faces = DeserializeLumpArray<Face>(header, stream, binaryReader)
+                Planes = DeserializeLumpArray<Plane>(header, fileStream, binaryReader),
+                Vertices = DeserializeLumpArray<Vector>(header, fileStream, binaryReader),
+                Edges = DeserializeLumpArray<Edge>(header, fileStream, binaryReader),
+                SurfaceEdges = DeserializeLumpArray<SurfaceEdge>(header, fileStream, binaryReader),
+                Faces = DeserializeLumpArray<Face>(header, fileStream, binaryReader),
+                OriginalFaces = DeserializeLumpArray<OriginalFace>(header, fileStream, binaryReader)
             };
         }
 

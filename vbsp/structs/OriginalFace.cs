@@ -2,7 +2,7 @@
 
 namespace vbsp.structs
 {
-    public struct Face
+    public struct OriginalFace
     {
         public ushort PlaneIndex;
         public byte Side;
