@@ -1,4 +1,4 @@
-﻿namespace vbsp
+﻿namespace vbsp.structs
 {
     public struct Header
     {
