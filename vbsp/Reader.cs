@@ -1,20 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using UnityEngine;
 using vbsp.structs;
-using Plane = vbsp.structs.Plane;
 
 namespace vbsp
 {
     public class Reader
     {
-        public static void Read(string path)
+        public static Map ReadStream(Stream stream)
         {
-            using var fileStream = File.OpenRead(path);
-
-            var binaryReader = new BinaryReader(fileStream);
+            var binaryReader = new BinaryReader(stream);
 
             var header = new Header
             {
@@ -45,74 +40,40 @@ namespace vbsp
 
             Console.WriteLine("Done reading lumps!");
 
-            ref var planeLump = ref header.GetLump(LumpType.Plane);
-
-            if (planeLump.Size % 20 != 0)
+            return new Map
             {
-                throw new TargetParameterCountException("Plane lump is of size not divisable by 20!");
+                Planes = DeserializeLumpArray<Plane>(header, stream, binaryReader),
+                Vertices = DeserializeLumpArray<Vector>(header, stream, binaryReader),
+                Edges = DeserializeLumpArray<Edge>(header, stream, binaryReader),
+                SurfaceEdges = DeserializeLumpArray<SurfaceEdge>(header, stream, binaryReader),
+                Faces = DeserializeLumpArray<Face>(header, stream, binaryReader)
+            };
+        }
+
+        public static T[] DeserializeLumpArray<T>(Header header, Stream fileStream, BinaryReader binaryReader)
+        {
+            var lumpIndex = Lump.GetLumpIndex<T>();
+            var lumpElementSize = Marshal.SizeOf(typeof(T));
+
+            ref var lump = ref header.Lumps[lumpIndex];
+
+            if (lump.Size % lumpElementSize != 0)
+            {
+                throw new Exception($"Error reading lump type: {typeof(T)}");
             }
 
-            //Ensure this is not corrupted, BSP planes are 20B each
-            var planeCount = planeLump.Size / 20;
+            var elementCount = lump.Size / lumpElementSize;
 
-            var planes = new Plane[planeCount];
+            var elementArray = new T[elementCount];
 
-            fileStream.Seek(planeLump.Offset, SeekOrigin.Begin);
+            fileStream.Seek(lump.Offset, SeekOrigin.Begin);
 
-            ref var vertexLump = ref header.GetLump(LumpType.Vertices);
-
-            for (var i = 0; i < planeCount; i++)
+            for (var i = 0; i < elementCount; i++)
             {
-                planes[i] = ByteToType<Plane>(binaryReader);
+                elementArray[i] = ByteToType<T>(binaryReader);
             }
 
-            Console.WriteLine($"Map plane count is: {planes.Length}");
-
-            //Ensure this is not corrupted, BSP Vectors are 12B each
-            if (vertexLump.Size % 12 != 0)
-            {
-                throw new TargetParameterCountException("Vertex lump is of size not divisable by 12!");
-            }
-
-            var vertexCount = vertexLump.Size / 12;
-
-            var vertices = new Vector3[vertexCount];
-
-            fileStream.Seek(vertexLump.Offset, SeekOrigin.Begin);
-
-            for (var i = 0; i < vertexCount; i++)
-            {
-                vertices[i] = ByteToType<Vector3>(binaryReader);
-            }
-
-            Console.WriteLine($"Map vertex count is: {vertices.Length}");
-
-            var brushLump = header.GetLump(LumpType.Brush);
-
-            //Ensure this is not corrupted, BSP brushes are 12B each
-            var brushCount = brushLump.Size / 12;
-
-            var brushes = new Brush[brushCount];
-
-            fileStream.Seek(brushLump.Offset, SeekOrigin.Begin);
-
-            for (var i = 0; i < brushCount; i++)
-            {
-                brushes[i] = ByteToType<Brush>(binaryReader);
-            }
-
-            Console.WriteLine($"Map brush count is: {brushes.Length}");
-
-            var faceLump = header.GetLump(LumpType.Face);
-
-            var faceCount = faceLump.Size / 56;
-
-            var faces = new Face[faceCount];
-
-            for (var i = 0; i < faceCount; i++)
-            {
-                faces[i] = ByteToType<Face>(binaryReader);
-            }
+            return elementArray;
         }
 
         public static T ByteToType<T>(BinaryReader reader)

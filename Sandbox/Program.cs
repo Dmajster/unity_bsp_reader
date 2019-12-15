@@ -6,7 +6,7 @@ namespace sandbox
     {
         private static void Main(string[] args)
         {
-            Reader.Read("./de_dust2.bsp");
+            var map = Reader.Read("./de_dust2.bsp");
         }
     }
 }
